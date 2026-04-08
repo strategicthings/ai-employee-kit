@@ -51,29 +51,75 @@ You need to do this every time you start a new conversation. That's why Option A
 
 For technical team members using the terminal. Requires tmux, Claude Code CLI, and bash.
 
-**Step 1: Install the global hook scripts.**
-Copy these 6 scripts to `~/.claude/bin/` and make them executable (`chmod +x`):
-- `resolve-session-id.sh` (identifies the current session)
-- `session-start-gate.sh` (fires the governance gate every session)
-- `toolcount-hook.sh` (tracks tool calls, warns at 33, triggers handoff at 37)
-- `handoff-detector.sh` (detects when a handoff file is written)
-- `chain-spawn.sh` (spawns a fresh Claude window with structured handoff when context fills up)
-- `gp3-retrospective.sh` (runs a GP-3 retrospective and blocks session exit until complete)
+**Step 1: Install the hook scripts.**
 
-These scripts are part of the advanced governance automation layer. For basic governance without hooks, simply use Option A or B. If you want to build your own hooks, the protocol works standalone. The hooks add session management and automatic handoffs on top.
+All scripts are in the `bin/` directory of this repo. Copy them to `~/.claude/bin/` and make them executable:
 
-**Step 2: Register the hooks in `~/.claude/settings.json`.**
-Add entries for each hook event:
-- **SessionStart**: `session-start-gate.sh`
-- **PostToolUse**: `toolcount-hook.sh` and `handoff-detector.sh`
-- **Stop**: `chain-spawn.sh` and `gp3-retrospective.sh`
+```bash
+mkdir -p ~/.claude/bin
+cp bin/*.sh ~/.claude/bin/
+chmod +x ~/.claude/bin/*.sh
+```
 
-**Step 3 (optional): Install the governance skill.**
+Scripts included:
+
+| Script | Purpose |
+|--------|---------|
+| `resolve-session-id.sh` | Derives a unique session ID from tmux pane or PID |
+| `session-start-gate.sh` | Fires the governance gate, resets counters, checks for handoffs |
+| `toolcount-hook.sh` | Counts tool calls, warns at 33, alerts at 37 (fires once per threshold) |
+| `handoff-detector.sh` | Auto-registers handoff files when Claude writes them |
+
+**Step 2: Edit project-specific block rules.**
+
+Open `~/.claude/bin/session-start-gate.sh` and find the "PROJECT-SPECIFIC BLOCK RULES" section near the bottom. Replace the example rules with rules specific to your project (deployment restrictions, content style rules, etc.). Or remove them if not needed.
+
+**Step 3: Register the hooks in `~/.claude/settings.json`.**
+
+Add this to your settings file (create it if it does not exist):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/bin/session-start-gate.sh",
+            "statusMessage": "Loading governance gate..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/bin/toolcount-hook.sh",
+            "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/bin/handoff-detector.sh",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Step 4 (optional): Install the governance skill.**
 1. Run: `mkdir -p ~/.claude/skills/ai-governance`
 2. Copy **GOVERNANCE-SKILL.md** to `~/.claude/skills/ai-governance/SKILL.md`
 3. In any Claude Code session, type `/ai-governance` to activate
 
-The hooks in Steps 1-2 are required for full automation. They power the chain system, handoff detection, tool counting, and GP-3 retrospective. The skill in Step 3 is a convenience that loads the full protocol text into a session on demand.
+The hooks in Steps 1-3 give you session awareness: governance gate on every session, tool call counting with degradation warnings, and handoff file detection. The skill in Step 4 is a convenience that loads the full protocol text into a session on demand.
 
 ## What Happens After You Install It
 
@@ -121,3 +167,4 @@ These are non-negotiable. Claude follows them every time.
 | GOVERNANCE-SKILL.md | The governance protocol. Paste this into Claude. |
 | ABOUT-TEMPLATE.md | Fill this in with your company/project details. |
 | QUICK-REFERENCE.md | One-page cheat sheet of the 9 steps. |
+| bin/ | Hook scripts for Claude Code CLI (Option C). Session gate, tool counting, handoff detection. |
