@@ -55,7 +55,7 @@ For technical team members using the terminal. Requires tmux, Claude Code CLI, a
 Copy these 6 scripts to `~/.claude/bin/` and make them executable (`chmod +x`):
 - `resolve-session-id.sh` (identifies the current session)
 - `session-start-gate.sh` (fires the governance gate every session)
-- `toolcount-hook.sh` (tracks tool calls, warns at 30, triggers handoff at 38)
+- `toolcount-hook.sh` (tracks tool calls, warns at 33, triggers handoff at 37)
 - `handoff-detector.sh` (detects when a handoff file is written)
 - `chain-spawn.sh` (spawns a fresh Claude window with structured handoff when context fills up)
 - `gp3-retrospective.sh` (runs a GP-3 retrospective and blocks session exit until complete)
@@ -109,7 +109,7 @@ These are non-negotiable. Claude follows them every time.
 - **For important work:** Fill in the ABOUT template so Claude has your company context.
 - **If Claude skips the governance acknowledgment:** Say "You skipped the governance acknowledgment. Start over."
 - **If Claude drifts mid-session:** Say "Run a governance pulse check." Claude will answer 3 self-check questions.
-- **For long sessions:** The toolcount hook warns at 30 tool calls and triggers handoff at 38. Take the handoff recommendation seriously.
+- **For long sessions:** The toolcount hook warns at 33 tool calls and triggers handoff at 37. Take the handoff recommendation seriously.
 - **If Claude stops following the rules:** Start a new conversation and re-paste the instructions.
 - **To turn it off for one task:** Say "Disable governance for this task."
 
