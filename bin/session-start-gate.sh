@@ -1,10 +1,10 @@
 #!/bin/bash
-# session-start-gate.sh — Global SessionStart hook for AI Governance v3.7.0
+# session-start-gate.sh — Global SessionStart hook for AI Governance v3.9.0
 #
 # Fires at the start of every Claude Code session, regardless of working directory.
 # Resets tool counter, checks for handoff files, and injects governance + critical rules.
 #
-# Deployed globally from ai-governance-standards v3.7.0.
+# Deployed globally from ai-governance-standards v3.9.0.
 
 # 1. Derive session ID from shared resolver
 source "$(dirname "$0")/resolve-session-id.sh"
