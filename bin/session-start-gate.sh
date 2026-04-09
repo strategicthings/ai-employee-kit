@@ -192,7 +192,7 @@ STEP 3 - READ GOVERNANCE-CORE.md (if present): If present, read it. Classify you
 
 STEP 4 - CHECK FOR HANDOFFS (I5): ${HANDOFF_HINT}If no handoff file is found, check MEMORY.md for project context from prior sessions. Never start Tier 1+ work without context from the last session.
 
-STEP 5 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts.
+STEP 5 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Exception: plan-continuation chains (handoff references an approved plan via PLAN= in chain metadata) synthesize for understanding only and proceed without waiting for confirmation. Stop only on drift, violations, or blocking errors. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts.
 
 CRITICAL BLOCK RULES (apply to ALL sessions, ALL projects):
 - NEVER delete any database file (.db, .sqlite, data directories). Zero exceptions. Use additive migrations only.
