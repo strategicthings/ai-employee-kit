@@ -70,8 +70,10 @@ echo "$PWD" > "$CHAIN_DIR_FILE"
 
 # Determine chain group: inherit from parent or create new one.
 # chain-spawn.sh writes the group ID for spawned windows.
+INHERITED_GROUP=false
 if [ -f "$CHAIN_GROUP_FILE" ]; then
     CHAIN_GROUP=$(cat "$CHAIN_GROUP_FILE")
+    INHERITED_GROUP=true
 else
     # Fresh session (manual start). Generate a unique group ID from pane + timestamp.
     CHAIN_GROUP="${SESSION_ID}-$(date +%s | tail -c 6)"
@@ -101,75 +103,82 @@ CWD=$(pwd)
 # follow the chain forward (claimer -> claimer's handoff -> next claimer) until
 # an unclaimed successor is found or the chain is broken. Stale handoff paths
 # are NEVER injected into context — model compliance alone fails ~10%.
+#
+# Chain group scoping: inherited sessions (chain-spawn) auto-claim as before.
+# Fresh sessions (manual start) do NOT auto-claim — they inform the user.
 if [ -d "$CWD/docs/governance/handoffs" ]; then
-    LATEST_UNCLAIMED=""
-    LATEST_ANY=""
-    LATEST_ANY_CLAIMED_BY=""
-    for CANDIDATE in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
-        # Skip files that are themselves sidecar markers
-        case "$CANDIDATE" in *.claimed-by-chain-*) continue ;; esac
-        # Track the most recent handoff regardless of claim status
-        if [ -z "$LATEST_ANY" ]; then
-            LATEST_ANY="$CANDIDATE"
-            CLAIM_SIDECAR=$(ls "${CANDIDATE}.claimed-by-chain-"* 2>/dev/null | head -1)
-            if [ -n "$CLAIM_SIDECAR" ]; then
-                LATEST_ANY_CLAIMED_BY=$(echo "$CLAIM_SIDECAR" | sed 's/.*claimed-by-chain-//')
-            fi
-        fi
-        # Check if unclaimed
-        if ! ls "${CANDIDATE}.claimed-by-chain-"* 1>/dev/null 2>&1; then
-            LATEST_UNCLAIMED="$CANDIDATE"
-            break
-        fi
-    done
 
-    if [ -n "$LATEST_UNCLAIMED" ]; then
-        # Unclaimed handoff found -- claim it
-        touch "${LATEST_UNCLAIMED}.claimed-by-chain-${CHAIN_NUM}"
-        HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $LATEST_UNCLAIMED (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
-        echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
-    elif [ -n "$LATEST_ANY" ]; then
-        # All handoffs claimed. Mechanically follow the chain forward.
-        # NEVER inject the stale handoff path — model compliance fails ~10% of the time.
-        CURRENT_CLAIMER="$LATEST_ANY_CLAIMED_BY"
-        FOLLOW_HOPS=0
-        MAX_FOLLOW_HOPS=20
-        while [ "$FOLLOW_HOPS" -lt "$MAX_FOLLOW_HOPS" ]; do
-            FOLLOW_HOPS=$((FOLLOW_HOPS + 1))
-            # Scan for a handoff written by the claiming chain
-            # Regex: "chain${N}" followed by non-digit prevents chain4 matching chain40
-            SUCCESSOR=""
-            for SUCC_CAND in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
-                case "$SUCC_CAND" in *.claimed-by-chain-*) continue ;; esac
-                SUCC_BASE=$(basename "$SUCC_CAND")
-                if echo "$SUCC_BASE" | grep -qE "chain${CURRENT_CLAIMER}([^0-9]|\.md$)"; then
-                    SUCCESSOR="$SUCC_CAND"
-                    break
+    if [ "$INHERITED_GROUP" = true ]; then
+        # INHERITED SESSION: auto-detect and claim (existing behavior)
+        LATEST_UNCLAIMED=""
+        LATEST_ANY=""
+        LATEST_ANY_CLAIMED_BY=""
+        for CANDIDATE in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
+            case "$CANDIDATE" in *.claimed-by-chain-*) continue ;; esac
+            if [ -z "$LATEST_ANY" ]; then
+                LATEST_ANY="$CANDIDATE"
+                CLAIM_SIDECAR=$(ls "${CANDIDATE}.claimed-by-chain-"* 2>/dev/null | head -1)
+                if [ -n "$CLAIM_SIDECAR" ]; then
+                    LATEST_ANY_CLAIMED_BY=$(echo "$CLAIM_SIDECAR" | sed 's/.*claimed-by-chain-//')
                 fi
-            done
-
-            if [ -z "$SUCCESSOR" ]; then
-                # Broken chain — claimer wrote no successor. No path exposed.
-                HANDOFF_HINT="I5 HANDOFF CHAIN BROKEN: Chain $CURRENT_CLAIMER claimed the previous handoff but wrote no successor. Do NOT search for or read old handoff files. Ask the user for direction before starting any work. "
-                break
             fi
-
-            # Check if the successor is also claimed
-            SUCC_CLAIM=$(ls "${SUCCESSOR}.claimed-by-chain-"* 2>/dev/null | head -1)
-            if [ -z "$SUCC_CLAIM" ]; then
-                # Unclaimed successor found — claim it and inject
-                touch "${SUCCESSOR}.claimed-by-chain-${CHAIN_NUM}"
-                HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $SUCCESSOR (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
-                echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
+            if ! ls "${CANDIDATE}.claimed-by-chain-"* 1>/dev/null 2>&1; then
+                LATEST_UNCLAIMED="$CANDIDATE"
                 break
-            else
-                # Successor also claimed, follow the chain forward
-                CURRENT_CLAIMER=$(echo "$SUCC_CLAIM" | sed 's/.*claimed-by-chain-//')
             fi
         done
 
-        if [ "$FOLLOW_HOPS" -ge "$MAX_FOLLOW_HOPS" ]; then
-            HANDOFF_HINT="I5 HANDOFF ERROR: Chain-following exceeded $MAX_FOLLOW_HOPS hops. Possible circular claims. Ask the user for direction. "
+        if [ -n "$LATEST_UNCLAIMED" ]; then
+            touch "${LATEST_UNCLAIMED}.claimed-by-chain-${CHAIN_NUM}"
+            HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $LATEST_UNCLAIMED (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
+            echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
+        elif [ -n "$LATEST_ANY" ]; then
+            CURRENT_CLAIMER="$LATEST_ANY_CLAIMED_BY"
+            FOLLOW_HOPS=0
+            MAX_FOLLOW_HOPS=20
+            while [ "$FOLLOW_HOPS" -lt "$MAX_FOLLOW_HOPS" ]; do
+                FOLLOW_HOPS=$((FOLLOW_HOPS + 1))
+                SUCCESSOR=""
+                for SUCC_CAND in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
+                    case "$SUCC_CAND" in *.claimed-by-chain-*) continue ;; esac
+                    SUCC_BASE=$(basename "$SUCC_CAND")
+                    if echo "$SUCC_BASE" | grep -qE "chain${CURRENT_CLAIMER}([^0-9]|\.md$)"; then
+                        SUCCESSOR="$SUCC_CAND"
+                        break
+                    fi
+                done
+
+                if [ -z "$SUCCESSOR" ]; then
+                    HANDOFF_HINT="I5 HANDOFF CHAIN BROKEN: Chain $CURRENT_CLAIMER claimed the previous handoff but wrote no successor. Do NOT search for or read old handoff files. Ask the user for direction before starting any work. "
+                    break
+                fi
+
+                SUCC_CLAIM=$(ls "${SUCCESSOR}.claimed-by-chain-"* 2>/dev/null | head -1)
+                if [ -z "$SUCC_CLAIM" ]; then
+                    touch "${SUCCESSOR}.claimed-by-chain-${CHAIN_NUM}"
+                    HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $SUCCESSOR (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
+                    echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
+                    break
+                else
+                    CURRENT_CLAIMER=$(echo "$SUCC_CLAIM" | sed 's/.*claimed-by-chain-//')
+                fi
+            done
+
+            if [ "$FOLLOW_HOPS" -ge "$MAX_FOLLOW_HOPS" ]; then
+                HANDOFF_HINT="I5 HANDOFF ERROR: Chain-following exceeded $MAX_FOLLOW_HOPS hops. Possible circular claims. Ask the user for direction. "
+            fi
+        fi
+    else
+        # FRESH SESSION: do NOT auto-claim. Inform if unclaimed handoffs exist.
+        UNCLAIMED_COUNT=0
+        for CANDIDATE in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
+            case "$CANDIDATE" in *.claimed-by-chain-*) continue ;; esac
+            if ! ls "${CANDIDATE}.claimed-by-chain-"* 1>/dev/null 2>&1; then
+                UNCLAIMED_COUNT=$((UNCLAIMED_COUNT + 1))
+            fi
+        done
+        if [ "$UNCLAIMED_COUNT" -gt 0 ]; then
+            HANDOFF_HINT="I5 INFO: ${UNCLAIMED_COUNT} unclaimed handoff(s) exist in docs/governance/handoffs/ from previous sessions. This is a fresh session — no auto-claim. Check MEMORY.md for context or ask the user which work stream to resume. "
         fi
     fi
 fi
