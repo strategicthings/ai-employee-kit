@@ -1,10 +1,10 @@
 #!/bin/bash
-# session-start-gate.sh — Global SessionStart hook for AI Governance v3.6.1
+# session-start-gate.sh — Global SessionStart hook for AI Governance v3.7.0
 #
 # Fires at the start of every Claude Code session, regardless of working directory.
 # Resets tool counter, checks for handoff files, and injects governance + critical rules.
 #
-# Part of the AI Employee Kit: https://github.com/strategicthings/ai-employee-kit
+# Deployed globally from ai-governance-standards v3.7.0.
 
 # 1. Derive session ID from shared resolver
 source "$(dirname "$0")/resolve-session-id.sh"
@@ -19,7 +19,7 @@ echo "$SESSION_ID" > "/tmp/claude-session-id-ppid-$PPID"
 if [ -n "$TMUX" ]; then
     LIVE_PANES=$(tmux list-panes -a -F '#{pane_id}' 2>/dev/null | sed 's/^%//')
     # Clean ALL session-scoped temp files (including handoff, meta, newpane)
-    for STALE in /tmp/claude-session-toolcount-* /tmp/claude-chain-dir-* /tmp/claude-chain-group-* /tmp/claude-chain-handoff-* /tmp/claude-chain-meta-* /tmp/claude-chain-newpane-* /tmp/claude-handoff-written-*; do
+    for STALE in /tmp/claude-session-toolcount-* /tmp/claude-chain-dir-* /tmp/claude-chain-group-* /tmp/claude-chain-handoff-* /tmp/claude-chain-meta-* /tmp/claude-chain-newpane-* /tmp/claude-handoff-written-* /tmp/claude-session-mutations-* /tmp/claude-session-tier-* /tmp/claude-session-escalation-fired-*; do
         [ -f "$STALE" ] || continue
         SUFFIX="${STALE##*-}"
         case "$SUFFIX" in *[!0-9]*) continue ;; esac
@@ -97,9 +97,10 @@ HANDOFF_HINT=""
 CWD=$(pwd)
 
 # Check common handoff locations.
-# Strategy: find the latest unclaimed handoff. If all are claimed, find the
-# latest handoff regardless and tell the chain who claimed it so it can follow
-# the chain forward to the claiming chain's successor handoff.
+# Strategy: find the latest unclaimed handoff. If all are claimed, mechanically
+# follow the chain forward (claimer -> claimer's handoff -> next claimer) until
+# an unclaimed successor is found or the chain is broken. Stale handoff paths
+# are NEVER injected into context — model compliance alone fails ~10%.
 if [ -d "$CWD/docs/governance/handoffs" ]; then
     LATEST_UNCLAIMED=""
     LATEST_ANY=""
@@ -126,9 +127,50 @@ if [ -d "$CWD/docs/governance/handoffs" ]; then
         # Unclaimed handoff found -- claim it
         touch "${LATEST_UNCLAIMED}.claimed-by-chain-${CHAIN_NUM}"
         HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $LATEST_UNCLAIMED (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
+        echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
     elif [ -n "$LATEST_ANY" ]; then
-        # All handoffs claimed. Point to the latest and tell the chain to follow forward.
-        HANDOFF_HINT="I5 HANDOFF FOUND (CLAIMED): Latest handoff at $LATEST_ANY was already claimed by Chain $LATEST_ANY_CLAIMED_BY. Read it to get context, then look for a successor handoff written by Chain $LATEST_ANY_CLAIMED_BY in the same directory. If no successor exists, that chain may have ended without writing one. Ask the user for direction. "
+        # All handoffs claimed. Mechanically follow the chain forward.
+        # NEVER inject the stale handoff path — model compliance fails ~10% of the time.
+        CURRENT_CLAIMER="$LATEST_ANY_CLAIMED_BY"
+        FOLLOW_HOPS=0
+        MAX_FOLLOW_HOPS=20
+        while [ "$FOLLOW_HOPS" -lt "$MAX_FOLLOW_HOPS" ]; do
+            FOLLOW_HOPS=$((FOLLOW_HOPS + 1))
+            # Scan for a handoff written by the claiming chain
+            # Regex: "chain${N}" followed by non-digit prevents chain4 matching chain40
+            SUCCESSOR=""
+            for SUCC_CAND in $(ls -t "$CWD/docs/governance/handoffs/"*.md 2>/dev/null); do
+                case "$SUCC_CAND" in *.claimed-by-chain-*) continue ;; esac
+                SUCC_BASE=$(basename "$SUCC_CAND")
+                if echo "$SUCC_BASE" | grep -qE "chain${CURRENT_CLAIMER}([^0-9]|\.md$)"; then
+                    SUCCESSOR="$SUCC_CAND"
+                    break
+                fi
+            done
+
+            if [ -z "$SUCCESSOR" ]; then
+                # Broken chain — claimer wrote no successor. No path exposed.
+                HANDOFF_HINT="I5 HANDOFF CHAIN BROKEN: Chain $CURRENT_CLAIMER claimed the previous handoff but wrote no successor. Do NOT search for or read old handoff files. Ask the user for direction before starting any work. "
+                break
+            fi
+
+            # Check if the successor is also claimed
+            SUCC_CLAIM=$(ls "${SUCCESSOR}.claimed-by-chain-"* 2>/dev/null | head -1)
+            if [ -z "$SUCC_CLAIM" ]; then
+                # Unclaimed successor found — claim it and inject
+                touch "${SUCCESSOR}.claimed-by-chain-${CHAIN_NUM}"
+                HANDOFF_HINT="I5 HANDOFF FOUND: Previous session handoff exists at $SUCCESSOR (claimed by Chain $CHAIN_NUM). Read it before starting new work. "
+                echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
+                break
+            else
+                # Successor also claimed, follow the chain forward
+                CURRENT_CLAIMER=$(echo "$SUCC_CLAIM" | sed 's/.*claimed-by-chain-//')
+            fi
+        done
+
+        if [ "$FOLLOW_HOPS" -ge "$MAX_FOLLOW_HOPS" ]; then
+            HANDOFF_HINT="I5 HANDOFF ERROR: Chain-following exceeded $MAX_FOLLOW_HOPS hops. Possible circular claims. Ask the user for direction. "
+        fi
     fi
 fi
 
@@ -159,8 +201,9 @@ CRITICAL BLOCK RULES (apply to ALL sessions, ALL projects):
 - Report outcomes faithfully (I9). No manufactured green results. No hedging confirmed results.
 
 PROJECT-SPECIFIC BLOCK RULES (edit these for your project, or remove if not applicable):
-- Example: NEVER use em dashes in any content. Use periods, commas, or restructure.
-- Example: NEVER deploy to production without explicit human approval.
-- Example: NEVER modify customer records without verifying backup exists.
-- Add your own project-specific rules here."}}
+- NEVER use em dashes in any content. Use periods, commas, or restructure.
+- Demo CTA URL is landing.tratta.io/book-a-demo-tratta-2025 (with UTMs). NOT tratta.io/request-demo or /demo.
+- Contact page is tratta.io/contact-us, NOT tratta.io/contact.
+- NEVER deploy JSON-LD schema via Webflow Scripts API. Generate locally, Josh deploys manually.
+- NEVER DNC any HubSpot company with Tratta-specific properties populated (tratta_created_at, revenue, portal, products, etc.)."}}
 HOOKEOF

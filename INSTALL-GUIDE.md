@@ -67,8 +67,8 @@ Scripts included:
 |--------|---------|
 | `resolve-session-id.sh` | Derives a unique session ID from tmux pane or PID |
 | `session-start-gate.sh` | Fires the governance gate, resets counters, checks for handoffs |
-| `toolcount-hook.sh` | Counts tool calls, warns at 33, alerts at 37 (fires once per threshold) |
-| `handoff-detector.sh` | Auto-registers handoff files when Claude writes them |
+
+These two scripts give you the governance gate (safety rules injected every session) and session awareness (unique session IDs, handoff detection). For advanced capabilities (tool call counting, automatic session chaining, secret scrubbing), see the full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repo.
 
 **Step 2: Edit project-specific block rules.**
 
@@ -92,23 +92,6 @@ Add this to your settings file (create it if it does not exist):
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/bin/toolcount-hook.sh",
-            "timeout": 3
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/bin/handoff-detector.sh",
-            "timeout": 3
-          }
-        ]
-      }
     ]
   }
 }
@@ -119,7 +102,7 @@ Add this to your settings file (create it if it does not exist):
 2. Copy **GOVERNANCE-SKILL.md** to `~/.claude/skills/ai-governance/SKILL.md`
 3. In any Claude Code session, type `/ai-governance` to activate
 
-The hooks in Steps 1-3 give you session awareness: governance gate on every session, tool call counting with degradation warnings, and handoff file detection. The skill in Step 4 is a convenience that loads the full protocol text into a session on demand.
+The hooks in Steps 1-3 give you session awareness: governance gate on every session and handoff detection at session start. The skill in Step 4 is a convenience that loads the full protocol text into a session on demand.
 
 ## What Happens After You Install It
 
@@ -155,7 +138,7 @@ These are non-negotiable. Claude follows them every time.
 - **For important work:** Fill in the ABOUT template so Claude has your company context.
 - **If Claude skips the governance acknowledgment:** Say "You skipped the governance acknowledgment. Start over."
 - **If Claude drifts mid-session:** Say "Run a governance pulse check." Claude will answer 3 self-check questions.
-- **For long sessions:** The toolcount hook warns at 33 tool calls and triggers handoff at 37. Take the handoff recommendation seriously.
+- **For long sessions:** If a conversation exceeds ~40 tool uses, context may degrade. Write a session summary and start fresh. The full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repo includes automatic tool counting and handoff hooks.
 - **If Claude stops following the rules:** Start a new conversation and re-paste the instructions.
 - **To turn it off for one task:** Say "Disable governance for this task."
 
@@ -167,4 +150,4 @@ These are non-negotiable. Claude follows them every time.
 | GOVERNANCE-SKILL.md | The governance protocol. Paste this into Claude. |
 | ABOUT-TEMPLATE.md | Fill this in with your company/project details. |
 | QUICK-REFERENCE.md | One-page cheat sheet of the 9 steps. |
-| bin/ | Hook scripts for Claude Code CLI (Option C). Session gate, tool counting, handoff detection. |
+| bin/ | Hook scripts for Claude Code CLI (Option C). Session gate and session ID resolver. |

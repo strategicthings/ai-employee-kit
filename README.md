@@ -29,7 +29,7 @@ For detailed setup options (including Claude Code CLI setup), see [INSTALL-GUIDE
 | `INSTALL-GUIDE.md` | Step-by-step installation guide with three setup options. |
 | `QUICK-REFERENCE.md` | One-page cheat sheet of the 9 governance steps and 7 safety rules. |
 | `ABOUT-TEMPLATE.md` | Template for adding your company context so Claude understands your business. |
-| `bin/` | Hook scripts for Claude Code CLI: session management, tool counting, and handoff detection. See INSTALL-GUIDE.md Option C. |
+| `bin/` | Hook scripts for Claude Code CLI: governance gate and session ID resolver. See INSTALL-GUIDE.md Option C. |
 
 ## How It Works
 
@@ -72,12 +72,11 @@ Use `ABOUT-TEMPLATE.md` to give Claude your company context. Fill in your compan
 Claude Code users can add the included `bin/` hook scripts for automated session management. The starter kit provides:
 
 - **Governance gate** that fires on every session start, injecting safety rules and checking for handoffs
-- **Tool call counting** with context-preserving warnings at 33 and 37 calls
-- **Handoff detection** that auto-registers handoff files when Claude writes them
+- **Session awareness** with unique session IDs derived from tmux pane or PID
 
-These hooks give Claude session awareness. It knows when context is degrading, it can write structured handoff files, and the system detects them automatically. When a session ends, you start a new one and point it at the handoff file to continue where the last session left off.
+These hooks ensure the governance protocol loads automatically every session. When a session ends, you start a new one and point it at a handoff file to continue where the last session left off.
 
-For teams that need fully autonomous multi-session chains (automatic spawning, security guards, retrospective gates), those capabilities can be built on top of this foundation.
+For teams that need advanced capabilities (tool call counting, automatic multi-session chaining, secret scrubbing, security guards, retrospective gates), see the full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repository.
 
 See [INSTALL-GUIDE.md](INSTALL-GUIDE.md) Option C for setup.
 
