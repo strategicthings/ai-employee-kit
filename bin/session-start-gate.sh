@@ -184,13 +184,15 @@ fi
 cat <<HOOKEOF
 {"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"GOVERNANCE GATE ACTIVE. Follow this sequence exactly:
 
-STEP 1 - READ CLAUDE.md: If a CLAUDE.md exists in the working directory, read it NOW. If it contains a governance gate, produce the acknowledgment (Governance active. Tier [X]. Archetype [Y]. Safety rules R1-R7 loaded. Invariants I1-I9 loaded.).
+STEP 1 - ACKNOWLEDGE GOVERNANCE: Your FIRST visible response to the user MUST begin with: 'Governance active. Safety rules R1-R7 loaded. Invariants I1-I9 loaded. Awaiting task.' This is mandatory in every session, every project. Do not skip it.
 
-STEP 2 - READ GOVERNANCE-CORE.md: If present, read it. Classify your task using the Task Router (Tier 0-3) and Skill Routing Table (Marketing/App/Data/Ops). Activate the matching archetype skill for Tier 1+ work.
+STEP 2 - READ CLAUDE.md (if present): If a CLAUDE.md exists in the working directory, read it for project-specific context, tier level, and archetype. If it contains a governance gate, include the tier and archetype in your acknowledgment. If no CLAUDE.md exists, the governance rules from this hook still apply.
 
-STEP 3 - CHECK FOR HANDOFFS (I5): ${HANDOFF_HINT}If no handoff file is found, check MEMORY.md for project context from prior sessions. Never start Tier 1+ work without context from the last session.
+STEP 3 - READ GOVERNANCE-CORE.md (if present): If present, read it. Classify your task using the Task Router (Tier 0-3) and Skill Routing Table (Marketing/App/Data/Ops). Activate the matching archetype skill for Tier 1+ work.
 
-STEP 4 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts.
+STEP 4 - CHECK FOR HANDOFFS (I5): ${HANDOFF_HINT}If no handoff file is found, check MEMORY.md for project context from prior sessions. Never start Tier 1+ work without context from the last session.
+
+STEP 5 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts.
 
 CRITICAL BLOCK RULES (apply to ALL sessions, ALL projects):
 - NEVER delete any database file (.db, .sqlite, data directories). Zero exceptions. Use additive migrations only.
