@@ -201,9 +201,7 @@ CRITICAL BLOCK RULES (apply to ALL sessions, ALL projects):
 - Report outcomes faithfully (I9). No manufactured green results. No hedging confirmed results.
 
 PROJECT-SPECIFIC BLOCK RULES (edit these for your project, or remove if not applicable):
-- NEVER use em dashes in any content. Use periods, commas, or restructure.
-- Demo CTA URL is landing.tratta.io/book-a-demo-tratta-2025 (with UTMs). NOT tratta.io/request-demo or /demo.
-- Contact page is tratta.io/contact-us, NOT tratta.io/contact.
-- NEVER deploy JSON-LD schema via Webflow Scripts API. Generate locally, Josh deploys manually.
-- NEVER DNC any HubSpot company with Tratta-specific properties populated (tratta_created_at, revenue, portal, products, etc.)."}}
+- Example: NEVER use em dashes in any content. Use periods, commas, or restructure.
+- Example: NEVER deploy generated code to production without manual review.
+- Replace these examples with rules specific to your organization."}}
 HOOKEOF
