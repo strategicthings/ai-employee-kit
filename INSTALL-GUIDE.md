@@ -13,18 +13,14 @@ Once installed, Claude will:
 
 ## Which Kit Are You?
 
-**If you work at Tratta:** Use the Tratta-specific kit in the `examples/tratta/` folder. It comes pre-filled with Tratta's company context, industry terms, business rules, and content preferences. Follow `examples/tratta/INSTALL-GUIDE-TRATTA.md` instead of this guide.
-
-**If you work anywhere else:** Continue with this guide. You will fill in the ABOUT-TEMPLATE.md with your own company context.
+Fill in ABOUT-TEMPLATE.md with your own company context before running the install steps below.
 
 **Upgrading from 3.x?** See `tier-2/UPGRADE-GUIDE.md` for the step-by-step 3.x → 4.0.0 upgrade procedure before re-running the install steps below.
 
 | Scenario | What to use |
 |----------|------------|
-| Tratta employee (Claude.ai) | `examples/tratta/INSTALL-GUIDE-TRATTA.md` + `examples/tratta/TRATTA-GOVERNANCE-SKILL.md` + `examples/tratta/ABOUT-TRATTA.md` |
-| Tratta employee (Claude Code) | `examples/tratta/TRATTA-GOVERNANCE-SKILL.md` as a skill, or activate `/ai-governance` then load ABOUT-TRATTA.md |
-| Non-Tratta (Claude.ai) | This guide + `GOVERNANCE-SKILL.md` + fill in `ABOUT-TEMPLATE.md` |
-| Non-Tratta (Claude Code) | `GOVERNANCE-SKILL.md` as a skill, or activate `/ai-governance` then fill in the project's `ABOUT.md` from the repo root template |
+| Claude.ai | This guide + `GOVERNANCE-SKILL.md` + fill in `ABOUT-TEMPLATE.md` |
+| Claude Code | `GOVERNANCE-SKILL.md` as a skill, or activate `/ai-governance` then fill in the project's `ABOUT.md` from the repo root template |
 
 ## How to Install (Choose One)
 
