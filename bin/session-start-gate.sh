@@ -68,6 +68,11 @@ if [ ! -f "$SECRET_FILE" ]; then
             # Record mtime baseline for §3.4 tripwire.
             stat -f %m "$SECRET_FILE" > "$SECRET_MTIME_FILE" 2>/dev/null || \
                 stat -c %Y "$SECRET_FILE" > "$SECRET_MTIME_FILE" 2>/dev/null
+            # Purge c4_link marker bound to any prior (rotated) secret. The marker
+            # MAC is computed against the old secret's UUID; leaving it in place
+            # would trip userpromptsubmit-guard's "forged marker" block on the next
+            # approval phrase, even though the marker is merely stale.
+            rm -f "/tmp/claude-c4-link-${SESSION_ID}.json"
         else
             rm -f "$TMP_SECRET"
             echo "HOOK INTEGRITY: session-start-gate concurrent secret creation detected" \
@@ -89,6 +94,20 @@ if [ -n "$TMUX" ]; then
     for STALE in /tmp/claude-session-toolcount-* /tmp/claude-chain-dir-* /tmp/claude-chain-group-* /tmp/claude-chain-handoff-* /tmp/claude-chain-meta-* /tmp/claude-chain-newpane-* /tmp/claude-chain-skill-* /tmp/claude-handoff-written-* /tmp/claude-session-mutations-* /tmp/claude-session-tier-* /tmp/claude-session-escalation-fired-* /tmp/claude-chain-fingerprint-* /tmp/claude-session-plan-* /tmp/claude-session-planmode-* /tmp/claude-session-approved-* /tmp/claude-session-scope-* /tmp/claude-session-synth-* /tmp/claude-session-reads-* /tmp/claude-phase-* /tmp/claude-concurrency-class-* /tmp/claude-entitlement-checked-* /tmp/claude-keyword-filter-* /tmp/claude-concurrent-writes-* /tmp/claude-replay-guard-* /tmp/claude-auth-token-log-*; do
         [ -f "$STALE" ] || continue
         SUFFIX="${STALE##*-}"
+        case "$SUFFIX" in *[!0-9]*) continue ;; esac
+        if ! echo "$LIVE_PANES" | grep -qx "$SUFFIX"; then
+            rm -f "$STALE"
+        fi
+    done
+    # Clean c4_link markers from dead panes (uses .json suffix, so handled separately
+    # from the digit-suffix sweep above). Marker lifecycle is bound to the session
+    # secret; a dead pane's marker is definitively stale and its MAC is no longer
+    # verifiable by any live session.
+    for STALE in /tmp/claude-c4-link-*.json; do
+        [ -f "$STALE" ] || continue
+        BASENAME="${STALE##*/}"
+        SUFFIX="${BASENAME#claude-c4-link-}"
+        SUFFIX="${SUFFIX%.json}"
         case "$SUFFIX" in *[!0-9]*) continue ;; esac
         if ! echo "$LIVE_PANES" | grep -qx "$SUFFIX"; then
             rm -f "$STALE"
