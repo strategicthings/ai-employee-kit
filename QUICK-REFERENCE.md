@@ -26,6 +26,15 @@ Print this or keep it open while working with Claude.
 | R6 | Know the undo. If irreversible, get explicit approval first. |
 | R7 | You decide. Claude recommends. You have final say. Always. |
 
+## Definition of Done (DoD)
+
+Work is done when: every plan task is complete AND the DoD statement is satisfied AND GP-1 passes. No drift into adjacent work.
+
+- **Plan header (Tier 1+):** "DoD = [terminal condition]"
+- **Non-goals (Tier 2+):** list what you will NOT do
+- **Stop phrase:** "Plan scope complete. [N/N] tasks done. DoD satisfied. Stopping. Handoff follows."
+- **Out-of-scope during execution:** "NOTICED: [description]. Not in scope. Logged for next session."
+
 ## Project Type Defaults
 
 | Type | Key Defaults |

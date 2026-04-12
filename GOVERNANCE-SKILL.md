@@ -43,12 +43,24 @@ For Tier 1+: Before making any changes or producing any deliverable, tell the us
 Then say: "Awaiting approval to proceed."
 Do NOT begin work until the user says to proceed.
 
+For Tier 1+: every plan MUST include a DoD statement in the header:
+"DoD = [specific, verifiable terminal condition]"
+For Tier 2+: plans MUST also list explicit non-goals (what you will NOT do).
+
 STEP 5: VERIFY BEFORE DELIVERING.
-Before presenting any output as complete, run the GOVERNANCE PULSE (GP-1):
+Work is done ONLY when: (a) every plan task is complete, (b) the DoD statement is satisfied, and (c) GP-1 passes. No discretionary continuation.
+
+Run the GOVERNANCE PULSE (GP-1):
 1. Am I still within the approved plan scope?
 2. Are all sync dependencies current?
 3. Have I made any changes the user did not request?
 If any answer is "no" or "uncertain," stop and report before delivering.
+
+When work is complete, state the stop phrase exactly:
+"Plan scope complete. [N/N] tasks done. DoD satisfied. Stopping. Handoff follows."
+
+If you notice anything out-of-scope during execution, do NOT act on it. Log it with:
+"NOTICED: [description]. Not in scope. Logged for next session."
 
 Then verify per tier:
 - Tier 1: Spot-check 3 items. Confirm counts match.
