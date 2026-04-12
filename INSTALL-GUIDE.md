@@ -11,6 +11,21 @@ Once installed, Claude will:
 - Flag its own mistakes if it catches them
 - Produce a summary at the end of every session
 
+## Which Kit Are You?
+
+**If you work at Tratta:** Use the Tratta-specific kit in the `examples/tratta/` folder. It comes pre-filled with Tratta's company context, industry terms, business rules, and content preferences. Follow `examples/tratta/INSTALL-GUIDE-TRATTA.md` instead of this guide.
+
+**If you work anywhere else:** Continue with this guide. You will fill in the ABOUT-TEMPLATE.md with your own company context.
+
+**Upgrading from 3.x?** See `tier-2/UPGRADE-GUIDE.md` for the step-by-step 3.x → 4.0.0 upgrade procedure before re-running the install steps below.
+
+| Scenario | What to use |
+|----------|------------|
+| Tratta employee (Claude.ai) | `examples/tratta/INSTALL-GUIDE-TRATTA.md` + `examples/tratta/TRATTA-GOVERNANCE-SKILL.md` + `examples/tratta/ABOUT-TRATTA.md` |
+| Tratta employee (Claude Code) | `examples/tratta/TRATTA-GOVERNANCE-SKILL.md` as a skill, or activate `/ai-governance` then load ABOUT-TRATTA.md |
+| Non-Tratta (Claude.ai) | This guide + `GOVERNANCE-SKILL.md` + fill in `ABOUT-TEMPLATE.md` |
+| Non-Tratta (Claude Code) | `GOVERNANCE-SKILL.md` as a skill, or activate `/ai-governance` then fill in the project's `ABOUT.md` from the repo root template |
+
 ## How to Install (Choose One)
 
 ### Option A: Claude.ai Projects (Recommended)
@@ -51,58 +66,32 @@ You need to do this every time you start a new conversation. That's why Option A
 
 For technical team members using the terminal. Requires tmux, Claude Code CLI, and bash.
 
-**Step 1: Install the hook scripts.**
+**Step 1: Install the global hook scripts.**
+Copy these 8 scripts to `~/.claude/bin/` and make them executable (`chmod +x`):
+- `resolve-session-id.sh` (identifies the current session)
+- `session-start-gate.sh` (fires the governance gate every session)
+- `post-tool-use.sh` (consolidated PostToolUse hook: tool counting, handoff detection, MCP injection scan, tier escalation)
+- `pretool-path-shell-guard.sh` (blocks path traversal and shell injection attempts)
+- `pretool-plan-guard.sh` (enforces plan-required, approval-required, scope, and synthesis-back gates before the first edit)
+- `chain-spawn.sh` (spawns a fresh Claude window with structured handoff when context fills up)
+- `gp3-retrospective.sh` (runs a GP-3 retrospective and blocks session exit until complete)
+- `scrub-session-secrets.sh` (scans session artifacts for leaked secrets)
 
-All scripts are in the `bin/` directory of this repo. Copy them to `~/.claude/bin/` and make them executable:
+**Step 2: Register the hooks in `~/.claude/settings.json`.**
+Add entries for each hook event:
+- **SessionStart**: `session-start-gate.sh`
+- **PreToolUse**: `pretool-path-shell-guard.sh` and `pretool-plan-guard.sh`
+- **PostToolUse**: `post-tool-use.sh`
+- **Stop**: `chain-spawn.sh`, `gp3-retrospective.sh`, and `scrub-session-secrets.sh`
 
-```bash
-mkdir -p ~/.claude/bin
-cp bin/*.sh ~/.claude/bin/
-chmod +x ~/.claude/bin/*.sh
-```
+See `docs/HARNESS-GUIDE.md` for the canonical `settings.json` example and full harness reference (chain system, GP-3 firing logic, memory seeding, debugging).
 
-Scripts included:
-
-| Script | Purpose |
-|--------|---------|
-| `resolve-session-id.sh` | Derives a unique session ID from tmux pane or PID |
-| `session-start-gate.sh` | Fires the governance gate, resets counters, checks for handoffs |
-
-These two scripts give you the governance gate (safety rules injected every session) and session awareness (unique session IDs, handoff detection). For advanced capabilities (tool call counting, automatic session chaining, secret scrubbing), see the full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repo.
-
-**Step 2: Edit project-specific block rules.**
-
-Open `~/.claude/bin/session-start-gate.sh` and find the "PROJECT-SPECIFIC BLOCK RULES" section near the bottom. Replace the example rules with rules specific to your project (deployment restrictions, content style rules, etc.). Or remove them if not needed.
-
-**Step 3: Register the hooks in `~/.claude/settings.json`.**
-
-Add this to your settings file (create it if it does not exist):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/bin/session-start-gate.sh",
-            "statusMessage": "Loading governance gate..."
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Step 4 (optional): Install the governance skill.**
+**Step 3 (optional): Install the governance skill.**
 1. Run: `mkdir -p ~/.claude/skills/ai-governance`
 2. Copy **GOVERNANCE-SKILL.md** to `~/.claude/skills/ai-governance/SKILL.md`
 3. In any Claude Code session, type `/ai-governance` to activate
 
-The hooks in Steps 1-3 give you session awareness: governance gate on every session and handoff detection at session start. The skill in Step 4 is a convenience that loads the full protocol text into a session on demand.
+The hooks in Steps 1-2 are required. They power the chain system, handoff detection, tool counting, and GP-3 retrospective. The skill in Step 3 is a convenience that loads the full protocol text into a session on demand.
 
 ## What Happens After You Install It
 
@@ -119,6 +108,8 @@ When you give Claude a task, it will:
 3. **Verify before delivering.** Claude checks its own work (counts match, facts verified, no unexpected changes).
 
 4. **Summarize at the end.** Claude produces a session summary so you (or the next person) can pick up where you left off.
+
+5. **Chain sessions automatically** when context fills up, spawning fresh Claude windows with structured handoffs so work continues uninterrupted.
 
 ## The 7 Safety Rules (Always Active)
 
@@ -138,7 +129,7 @@ These are non-negotiable. Claude follows them every time.
 - **For important work:** Fill in the ABOUT template so Claude has your company context.
 - **If Claude skips the governance acknowledgment:** Say "You skipped the governance acknowledgment. Start over."
 - **If Claude drifts mid-session:** Say "Run a governance pulse check." Claude will answer 3 self-check questions.
-- **For long sessions:** If a conversation exceeds ~40 tool uses, context may degrade. Write a session summary and start fresh. The full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repo includes automatic tool counting and handoff hooks.
+- **For long sessions:** The toolcount hook warns at 33 tool calls and triggers handoff at 37. Take the handoff recommendation seriously.
 - **If Claude stops following the rules:** Start a new conversation and re-paste the instructions.
 - **To turn it off for one task:** Say "Disable governance for this task."
 
@@ -150,4 +141,3 @@ These are non-negotiable. Claude follows them every time.
 | GOVERNANCE-SKILL.md | The governance protocol. Paste this into Claude. |
 | ABOUT-TEMPLATE.md | Fill this in with your company/project details. |
 | QUICK-REFERENCE.md | One-page cheat sheet of the 9 steps. |
-| bin/ | Hook scripts for Claude Code CLI (Option C). Session gate and session ID resolver. |

@@ -62,7 +62,7 @@ At the end of any Tier 1+ session, produce:
 - Decisions made and why
 - Warnings for next session
 
-SESSION LENGTH WARNING: Context degradation is tracked automatically by the toolcount hook (33 = warning, 37 = critical). If no hook is active and this conversation exceeds 40 tool uses, proactively tell the user: "This session is getting long. Governance instructions may be degrading. I recommend writing a handoff and starting a fresh session."
+SESSION LENGTH WARNING: Context degradation is tracked automatically by the toolcount hook (33 = warning, 37 = handoff deadline). If no hook is active and this conversation exceeds 40 tool uses, proactively tell the user: "This session is getting long. Governance instructions may be degrading. I recommend writing a handoff and starting a fresh session."
 
 RED FLAGS: If any of these occur, STOP and alert the user:
 - You are about to delete or overwrite something
