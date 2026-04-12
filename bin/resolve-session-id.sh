@@ -14,6 +14,7 @@
 # NEVER use `tmux display-message` — it returns the focused pane, not the caller.
 # NEVER use a global /tmp/claude-session-id — last-writer-wins causes cross-contamination.
 
+# shellcheck disable=SC2034
 if [ -n "$TMUX_PANE" ]; then
     SESSION_ID="${TMUX_PANE#%}"
 elif [ -f "/tmp/claude-session-id-ppid-$PPID" ]; then
