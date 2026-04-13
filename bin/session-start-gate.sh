@@ -1,10 +1,10 @@
 #!/bin/bash
-# session-start-gate.sh — Global SessionStart hook for AI Governance v4.0.0
+# session-start-gate.sh — Global SessionStart hook for AI Governance v4.2.3
 #
 # Fires at the start of every Claude Code session, regardless of working directory.
 # Resets tool counter, checks for handoff files, and injects governance + critical rules.
 #
-# Deployed globally from ai-governance-standards v4.0.0.
+# Deployed globally from ai-governance-standards v4.2.3.
 
 # 1. Derive session ID from shared resolver
 source "$(dirname "$0")/resolve-session-id.sh"
@@ -330,11 +330,13 @@ if [ -d "$CWD/docs/governance/handoffs" ]; then
 
                 if [ -n "$SUCCESSOR" ] && [ "$SUCCESSOR" = "$LATEST_ANY" ]; then
                     HANDOFF_HINT="I5 HANDOFF CHAIN ENDED: $CURRENT_CLAIMER claimed and updated the latest handoff but wrote no new successor. Check MEMORY.md for context or ask the user for direction. "
+                    echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
                     break
                 fi
 
                 if [ -z "$SUCCESSOR" ]; then
                     HANDOFF_HINT="I5 HANDOFF CHAIN BROKEN: $CURRENT_CLAIMER claimed the previous handoff but wrote no successor. Do NOT search for or read old handoff files. Ask the user for direction before starting any work. "
+                    echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
                     break
                 fi
 
@@ -351,6 +353,7 @@ if [ -d "$CWD/docs/governance/handoffs" ]; then
 
             if [ "$FOLLOW_HOPS" -ge "$MAX_FOLLOW_HOPS" ]; then
                 HANDOFF_HINT="I5 HANDOFF ERROR: Chain-following exceeded $MAX_FOLLOW_HOPS hops. Possible circular claims. Ask the user for direction. "
+                echo "inherited" > "/tmp/claude-session-tier-${SESSION_ID}"
             fi
         fi
     else
@@ -375,6 +378,28 @@ if [ -f "$CWD/HANDOFF.md" ] && ! ls "$CWD/HANDOFF.md.claimed-by-"* 1>/dev/null 2
     HANDOFF_HINT="I5 HANDOFF FOUND: HANDOFF.md exists in project root (claimed by $CHAIN_FINGERPRINT). Read it before starting new work. "
 fi
 
+# P31: MEMORY.md threshold monitor. Warn at 75% (150/200), alert at self-trim
+# threshold (180/200). Path follows Claude Code project-memory convention:
+# ~/.claude/projects/<slug>/memory/MEMORY.md where slug = CWD with / and space
+# replaced by dash.
+MEMORY_HINT=""
+MEMORY_SLUG="${CWD//\//-}"
+MEMORY_SLUG="${MEMORY_SLUG// /-}"
+MEMORY_FILE="$HOME/.claude/projects/${MEMORY_SLUG}/memory/MEMORY.md"
+if [ -f "$MEMORY_FILE" ]; then
+    MEMORY_LINES=$(wc -l < "$MEMORY_FILE" 2>/dev/null | tr -d ' ')
+    case "$MEMORY_LINES" in
+        ''|*[!0-9]*) : ;;
+        *)
+            if [ "$MEMORY_LINES" -ge 180 ]; then
+                MEMORY_HINT=" MEMORY.md THRESHOLD (P31): ${MEMORY_LINES}/200 lines, at or past self-trim threshold. Trim LRU entries before writing new ones."
+            elif [ "$MEMORY_LINES" -ge 150 ]; then
+                MEMORY_HINT=" MEMORY.md THRESHOLD (P31): ${MEMORY_LINES}/200 lines, approaching cap. Review for redundancy and decide which entries are still load-bearing."
+            fi
+            ;;
+    esac
+fi
+
 # P9: Concurrency classification reminder for inherited-tier sessions
 CONCURRENCY_NOTE=""
 if [ -f "/tmp/claude-session-tier-${SESSION_ID}" ]; then
@@ -383,11 +408,11 @@ fi
 
 # P40 plan-continuation: check if this chain inherits an approved plan
 PLAN_CONT_FILE="/tmp/claude-plan-continuation-${SESSION_ID}"
-STEP5_TEXT="STEP 5 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts.${CONCURRENCY_NOTE}"
+STEP5_TEXT="STEP 5 - CLASSIFY BEFORE EXECUTING: Before taking any action, state the tier level. For Tier 1+ work, complete the synthesis-back gate (P40): restate the task in your own words and wait for confirmation before proceeding. Production system changes (HubSpot, Slack, Notion, Webflow, CRM) are ALWAYS Tier 3. Write plan, get approval, then execute. No shortcuts. DoD BRACKETING (v4.2.0): when you present the plan, you MUST declare 'DoD = [terminal condition]' verbatim. At plan close, quote that exact DoD string and pair it with ✅ satisfied or ⚠️ satisfied with deviations. No paraphrasing. No assertion without quotation.${CONCURRENCY_NOTE}"
 if [ -f "$PLAN_CONT_FILE" ]; then
   PLAN_PATH=$(cat "$PLAN_CONT_FILE" 2>/dev/null)
   if [ -n "$PLAN_PATH" ] && [ -f "$PLAN_PATH" ]; then
-    STEP5_TEXT="STEP 5 - PLAN-CONTINUATION MODE (P40): This chain inherits an approved plan at ${PLAN_PATH}. Read the plan. Synthesize your understanding of the plan, current progress, and next steps for your own comprehension. Then proceed with execution without waiting for user confirmation. Stop and ask the user only if: the plan file is missing, you detect drift from the approved plan (GP-1 Q1), or you encounter 2+ blocking errors.${CONCURRENCY_NOTE}"
+    STEP5_TEXT="STEP 5 - PLAN-CONTINUATION MODE (P40): This chain inherits an approved plan at ${PLAN_PATH}. Read the plan. Synthesize your understanding of the plan, current progress, and next steps for your own comprehension. Then proceed with execution without waiting for user confirmation. Stop and ask the user only if: the plan file is missing, you detect drift from the approved plan (GP-1 Q1), or you encounter 2+ blocking errors. DoD BRACKETING (v4.2.0): the inherited plan's DoD must be quoted verbatim at close with ✅/⚠️ marker — locate it in the plan now so the closing quote matches.${CONCURRENCY_NOTE}"
   fi
 fi
 
@@ -408,7 +433,7 @@ STEP 2 - READ CLAUDE.md (if present): If a CLAUDE.md exists in the working direc
 
 ${STEP3_TEXT}
 
-STEP 4 - CHECK FOR HANDOFFS (I5): ${HANDOFF_HINT}If no handoff file is found, check MEMORY.md for project context from prior sessions. Never start Tier 1+ work without context from the last session.
+STEP 4 - CHECK FOR HANDOFFS (I5): ${HANDOFF_HINT}${MEMORY_HINT}If no handoff file is found, check MEMORY.md for project context from prior sessions. Never start Tier 1+ work without context from the last session.
 
 ${STEP5_TEXT}
 
