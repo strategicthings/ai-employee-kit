@@ -23,10 +23,11 @@ jobs:
         shell: bash
         run: |
           set -u
-          if grep -rE 'MAINTAINER_COMPANY_A|MAINTAINER_COMPANY_B|MAINTAINER_PARTNER_ID|MAINTAINER_OPERATOR|MAINTAINER_NUMERIC|C[0-9]{2,3}|G[0-9]{2,3}|security find-generic-password' . \
+          if grep -rE '(MAINTAINER_COMPANY_A|MAINTAINER_COMPANY_B|MAINTAINER_PARTNER_ID|MAINTAINER_OPERATOR|MAINTAINER_NUMERIC|security find-generic-password)|\bC[0-9]{2,3}\b|\bG[0-9]{2,3}\b' . \
               --exclude-dir=.git \
               --exclude-dir=node_modules \
-              --exclude=.denylist-maintainer; then
+              --exclude=.denylist-maintainer \
+              --exclude=denylist.yml; then
             echo "::error::Maintainer-only token leaked into public tree"
             exit 1
           fi
