@@ -1,5 +1,7 @@
 # AI Employee Kit
 
+Kit v0.1.0 · Built on AI Governance Protocol v2.0 · Tracks ai-governance-standards v5.1.1
+
 A governance protocol that makes AI assistants (Claude) more careful, reliable, and predictable.
 
 ## What This Does
@@ -29,7 +31,13 @@ For detailed setup options (including Claude Code CLI setup), see [INSTALL-GUIDE
 | `INSTALL-GUIDE.md` | Step-by-step installation guide with three setup options. |
 | `QUICK-REFERENCE.md` | One-page cheat sheet of the 9 governance steps and 7 safety rules. |
 | `ABOUT-TEMPLATE.md` | Template for adding your company context so Claude understands your business. |
-| `bin/` | Hook scripts for Claude Code CLI: governance gate and session ID resolver. See INSTALL-GUIDE.md Option C. |
+| `CONTRIBUTING.md` | Guide for contributors: scanner usage, counselor-review expectations for rule changes. |
+| `SECURITY.md` | Security policy. Directs vulnerability reports to GitHub Security Advisories. |
+| `CHANGELOG.md` | Release notes, starting with v0.1.0. |
+| `VERSION` | Tracks the kit version. |
+| `bin/` | Hook scripts for Claude Code CLI: session-start gate, session ID resolver, contamination scanner (`check-contamination.sh`), denylist template, and project-root verifier. See INSTALL-GUIDE.md Option C. |
+| `.claude/` | Example Claude Code settings: `project-gate.json.example` (project-overlay rules template) and `settings.json.example` (minimal hook wiring). |
+| `.github/` | CI workflow (`workflows/denylist.yml`) plus the maintainer-only token list. Runs the contamination scanner on every push/PR. |
 
 ## How It Works
 

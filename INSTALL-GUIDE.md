@@ -70,7 +70,7 @@ Copy these 8 scripts to `~/.claude/bin/` and make them executable (`chmod +x`):
 - `pretool-path-shell-guard.sh` (blocks path traversal and shell injection attempts)
 - `pretool-plan-guard.sh` (enforces plan-required, approval-required, scope, and synthesis-back gates before the first edit)
 - `chain-spawn.sh` (spawns a fresh Claude window with structured handoff when context fills up)
-- `gp3-retrospective.sh` (runs a GP-3 retrospective and blocks session exit until complete)
+- `stop-advisories.sh` (runs a GP-3 retrospective and blocks session exit until complete)
 - `scrub-session-secrets.sh` (scans session artifacts for leaked secrets)
 
 **Step 2: Register the hooks in `~/.claude/settings.json`.**
@@ -78,7 +78,7 @@ Add entries for each hook event:
 - **SessionStart**: `session-start-gate.sh`
 - **PreToolUse**: `pretool-path-shell-guard.sh` and `pretool-plan-guard.sh`
 - **PostToolUse**: `post-tool-use.sh`
-- **Stop**: `chain-spawn.sh`, `gp3-retrospective.sh`, and `scrub-session-secrets.sh`
+- **Stop**: `chain-spawn.sh`, `stop-advisories.sh`, and `scrub-session-secrets.sh`
 
 See `docs/HARNESS-GUIDE.md` for the canonical `settings.json` example and full harness reference (chain system, GP-3 firing logic, memory seeding, debugging).
 
