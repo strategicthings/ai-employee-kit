@@ -1,0 +1,18 @@
+# denylist.txt -- patterns the contamination scanner refuses to ship.
+#
+# One extended-regex pattern per line. Blank lines and lines starting with # are skipped.
+# Adopters: add company-specific secrets, employee identifiers, internal host names, etc.
+#
+# The scanner excludes .git/, node_modules/, this file, and .github/.denylist-maintainer
+# from working-tree scans. Stdin (pipe) mode scans every byte you send it, use it for
+# `git log --all -p` sweeps.
+
+# Generic defaults -- keep these active.
+TODO_SECRET
+XXX_PLACEHOLDER
+<local-path>
+
+# Examples (commented -- uncomment and customize for your org):
+# acme-corp-prod-key
+# [A-Za-z0-9+/]{40,}=        # candidate base64 secret pattern, tune for false positives
+# AKIA[0-9A-Z]{16}           # AWS access key ID

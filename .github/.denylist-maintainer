@@ -1,0 +1,17 @@
+# .denylist-maintainer -- tokens the CI sweep rejects if they appear anywhere in the
+# public tree except this file. This file is the authoritative list consulted by
+# .github/workflows/denylist.yml; the working-tree scanner (bin/check-contamination.sh)
+# reads only bin/denylist.txt and explicitly excludes this file.
+#
+# Maintainers: replace the placeholder tokens below with the real company-identifying
+# strings you want CI to reject. Keep one token per line. Comments and blanks ignored.
+
+MAINTAINER_COMPANY_A
+MAINTAINER_COMPANY_B
+MAINTAINER_PARTNER_ID
+MAINTAINER_OPERATOR
+MAINTAINER_NUMERIC
+security find-generic-password
+
+# Chain fingerprint prefixes (C## / G##) are matched by the CI sweep's inline regex,
+# not stored here -- listed for documentation only.
