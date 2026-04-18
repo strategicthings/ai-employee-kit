@@ -75,4 +75,3 @@ Work is done when: every plan task is complete AND the DoD statement is satisfie
 | CLAUDE.md | 200 lines max | Longer files cause Claude to forget rules |
 | Skill files | 500 lines max | Eats context budget needed for actual work |
 | MEMORY.md | 200 lines loaded | Anything past line 200 is invisible |
-| Session length | 33 tool calls = warning, 37 = handoff | Tool-call-based tracking replaces exchange counting. Handoffs are automatic in tmux. |
