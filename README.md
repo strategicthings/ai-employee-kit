@@ -40,6 +40,31 @@ For other setup options (standalone chat, or a pointer to the upstream Claude Co
 
 ## How It Works
 
+```mermaid
+flowchart TD
+    A[You give Claude a task] --> B{Classify the tier}
+    B -->|Tier 0<br/>Quick question| C[Claude proceeds]
+    B -->|Tier 1-3<br/>Real work| D[Claude plans]
+    D --> E[You approve]
+    E --> F[Claude executes]
+    F --> G[Claude verifies its own output]
+    G --> H{Verification passes?}
+    H -->|Yes| I[Deliver]
+    H -->|No| J[Stop and flag]
+    J --> E
+
+    classDef decide fill:#fff4e6,stroke:#d98f00,color:#000
+    classDef you fill:#e6f2ff,stroke:#2577cc,color:#000
+    classDef good fill:#e6ffed,stroke:#2ea04f,color:#000
+    classDef stop fill:#ffe6e6,stroke:#d94848,color:#000
+    class B,H decide
+    class E you
+    class C,I good
+    class J stop
+```
+
+The picture above is the whole protocol in one pass. The 7 safety rules run underneath every step; they do not appear as nodes because they are always on.
+
 ### Tier Classification
 
 Every task gets classified before Claude starts working:
