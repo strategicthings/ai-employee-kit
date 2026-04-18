@@ -103,7 +103,7 @@ Use `ABOUT-TEMPLATE.md` to give Claude your company context. Fill in your compan
 
 This kit ships the governance protocol doc, the ABOUT template, the quick reference, and a standalone contamination scanner. It does not ship the Claude Code hook harness.
 
-Teams using Claude Code CLI who want the full automated harness (session-start gates, tool call counting, multi-session chaining, secret scrubbing, path guards, retrospective gates) should install from the upstream repository: [strategicthings/ai-governance-standards](https://github.com/strategicthings/ai-governance-standards). That repo is the canonical source for the hook harness and is tracked by this kit's VERSION.
+Teams using Claude Code CLI who want the full automated harness (session-start gates, tool call counting, multi-session chaining, secret scrubbing, path guards, retrospective gates) install it from a private upstream repository. Access is limited; contact the kit maintainers to request it. The upstream is the canonical source for the hook harness and is tracked by this kit's VERSION.
 
 The contamination scanner in `bin/` runs standalone. Invoke `bash bin/check-contamination.sh` locally, or rely on the CI workflow to run it on every push and PR.
 
