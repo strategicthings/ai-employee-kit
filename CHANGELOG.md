@@ -4,6 +4,27 @@ All notable changes to the AI Employee Kit are documented here.
 
 Versioning follows [Semantic Versioning](https://semver.org/). The `0.x` line explicitly allows breaking changes.
 
+## [0.2.0] - 2026-04-18
+
+**Breaking:** `INSTALL-GUIDE.md` Option C (Claude Code harness install) removed. The full hook harness now lives upstream in `ai-governance-standards` v5.2.0. This kit focuses on the governance protocol, ABOUT template, quick reference, and the standalone contamination scanner.
+
+### Removed
+
+- `INSTALL-GUIDE.md` Option C Steps 1-3: the 8-script `bin/` copy list and the `~/.claude/settings.json` hook registrations. These referenced files the kit never shipped. Adopters who attempted Option C on v0.1.0 were following a broken path.
+- `.claude/settings.json.example` and `.claude/project-gate.json.example`. Both only paired with Option C's harness wiring and are no longer relevant.
+
+### Changed
+
+- `README.md`: tracks `ai-governance-standards` v5.2.0 (was v5.1.1). "What's In the Kit" table trimmed to the files the kit actually ships. "Advanced Setup" section redirects adopters who want the full Claude Code harness to the upstream repository.
+- `INSTALL-GUIDE.md`: Option C rewritten as a short pointer to `strategicthings/ai-governance-standards` for the hook harness install. Skill-only install instructions preserved inline.
+- `VERSION`: `0.2.0`.
+
+### Migration from v0.1.0
+
+Adopters on Option A (Claude.ai Projects) or Option B (standalone chat) are unaffected. Both options continue to work as documented.
+
+Adopters who attempted Option C on v0.1.0 were following an install path that referenced 8 harness scripts the kit never actually shipped. The correct install for the Claude Code CLI harness lives in `ai-governance-standards` v5.2.0. Follow the install in that repository. If you only want the governance skill loaded into Claude Code on demand, the skill-only install path is documented in the rewritten `INSTALL-GUIDE.md` Option C section.
+
 ## [0.1.0] - 2026-04-17
 
 First versioned release. Tracks `ai-governance-standards` v5.1.1, built on AI Governance Protocol v2.0.

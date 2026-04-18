@@ -1,6 +1,6 @@
 # AI Employee Kit
 
-Kit v0.1.0 · Built on AI Governance Protocol v2.0 · Tracks ai-governance-standards v5.1.1
+Kit v0.2.0 · Built on AI Governance Protocol v2.0 · Tracks ai-governance-standards v5.2.0
 
 A governance protocol that makes AI assistants (Claude) more careful, reliable, and predictable.
 
@@ -21,23 +21,22 @@ When installed, Claude will:
 
 That is it. Claude will now follow the governance protocol in every conversation within that project.
 
-For detailed setup options (including Claude Code CLI setup), see [INSTALL-GUIDE.md](INSTALL-GUIDE.md).
+For other setup options (standalone chat, or a pointer to the upstream Claude Code CLI harness), see [INSTALL-GUIDE.md](INSTALL-GUIDE.md).
 
 ## What's In the Kit
 
 | File | Description |
 |------|-------------|
 | `GOVERNANCE-SKILL.md` | The governance protocol itself. Paste this into Claude's project instructions. |
-| `INSTALL-GUIDE.md` | Step-by-step installation guide with three setup options. |
+| `INSTALL-GUIDE.md` | Setup guide covering Claude.ai Projects, standalone chat, and a pointer to the upstream Claude Code CLI harness. |
 | `QUICK-REFERENCE.md` | One-page cheat sheet of the 9 governance steps and 7 safety rules. |
 | `ABOUT-TEMPLATE.md` | Template for adding your company context so Claude understands your business. |
 | `CONTRIBUTING.md` | Guide for contributors: scanner usage, counselor-review expectations for rule changes. |
 | `SECURITY.md` | Security policy. Directs vulnerability reports to GitHub Security Advisories. |
-| `CHANGELOG.md` | Release notes, starting with v0.1.0. |
+| `CHANGELOG.md` | Release notes. |
 | `VERSION` | Tracks the kit version. |
-| `bin/` | Hook scripts for Claude Code CLI: session-start gate, session ID resolver, contamination scanner (`check-contamination.sh`), denylist template, and project-root verifier. See INSTALL-GUIDE.md Option C. |
-| `.claude/` | Example Claude Code settings: `project-gate.json.example` (project-overlay rules template) and `settings.json.example` (minimal hook wiring). |
-| `.github/` | CI workflow (`workflows/denylist.yml`) plus the maintainer-only token list. Runs the contamination scanner on every push/PR. |
+| `bin/check-contamination.sh` + `bin/denylist.txt` | Standalone contamination scanner and token denylist. Runs locally or in CI. |
+| `.github/workflows/denylist.yml` | CI workflow that runs the contamination scanner on every push and PR. |
 
 ## How It Works
 
@@ -77,16 +76,11 @@ Use `ABOUT-TEMPLATE.md` to give Claude your company context. Fill in your compan
 
 ## Advanced Setup
 
-Claude Code users can add the included `bin/` hook scripts for automated session management. The starter kit provides:
+This kit ships the governance protocol doc, the ABOUT template, the quick reference, and a standalone contamination scanner. It does not ship the Claude Code hook harness.
 
-- **Governance gate** that fires on every session start, injecting safety rules and checking for handoffs
-- **Session awareness** with unique session IDs derived from tmux pane or PID
+Teams using Claude Code CLI who want the full automated harness (session-start gates, tool call counting, multi-session chaining, secret scrubbing, path guards, retrospective gates) should install from the upstream repository: [strategicthings/ai-governance-standards](https://github.com/strategicthings/ai-governance-standards). That repo is the canonical source for the hook harness and is tracked by this kit's VERSION.
 
-These hooks ensure the governance protocol loads automatically every session. When a session ends, you start a new one and point it at a handoff file to continue where the last session left off.
-
-For teams that need advanced capabilities (tool call counting, automatic multi-session chaining, secret scrubbing, security guards, retrospective gates), see the full [ai-governance-standards](https://github.com/strategicthings/ai-governance-standards) repository.
-
-See [INSTALL-GUIDE.md](INSTALL-GUIDE.md) Option C for setup.
+The contamination scanner in `bin/` runs standalone. Invoke `bash bin/check-contamination.sh` locally, or rely on the CI workflow to run it on every push and PR.
 
 ## License
 
