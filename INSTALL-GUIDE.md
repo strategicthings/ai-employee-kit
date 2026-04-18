@@ -58,36 +58,13 @@ Use this if you don't want to create a project. You'll need to paste the instruc
 
 You need to do this every time you start a new conversation. That's why Option A (Projects) is better for ongoing work.
 
-### Option C: Claude Code (CLI)
+### Option C: Claude Code (CLI), install from upstream
 
-For technical team members using the terminal. Requires tmux, Claude Code CLI, and bash.
+For technical team members using the terminal, the full governance hook harness (session-start gates, tool call counting, multi-session chaining, path guards, retrospective gates, secret scrubbing) lives in the upstream repository: [strategicthings/ai-governance-standards](https://github.com/strategicthings/ai-governance-standards).
 
-**Step 1: Install the global hook scripts.**
-Copy these 8 scripts to `~/.claude/bin/` and make them executable (`chmod +x`):
-- `resolve-session-id.sh` (identifies the current session)
-- `session-start-gate.sh` (fires the governance gate every session)
-- `post-tool-use.sh` (consolidated PostToolUse hook: tool counting, handoff detection, MCP injection scan, tier escalation)
-- `pretool-path-shell-guard.sh` (blocks path traversal and shell injection attempts)
-- `pretool-plan-guard.sh` (enforces plan-required, approval-required, scope, and synthesis-back gates before the first edit)
-- `chain-spawn.sh` (spawns a fresh Claude window with structured handoff when context fills up)
-- `stop-advisories.sh` (runs a GP-3 retrospective and blocks session exit until complete)
-- `scrub-session-secrets.sh` (scans session artifacts for leaked secrets)
+Follow the install documented there. This kit tracks that repository's releases and intentionally does not duplicate the harness scripts. Keeping them in one place avoids drift between this kit and the canonical source every time the harness is updated.
 
-**Step 2: Register the hooks in `~/.claude/settings.json`.**
-Add entries for each hook event:
-- **SessionStart**: `session-start-gate.sh`
-- **PreToolUse**: `pretool-path-shell-guard.sh` and `pretool-plan-guard.sh`
-- **PostToolUse**: `post-tool-use.sh`
-- **Stop**: `chain-spawn.sh`, `stop-advisories.sh`, and `scrub-session-secrets.sh`
-
-See `docs/HARNESS-GUIDE.md` for the canonical `settings.json` example and full harness reference (chain system, GP-3 firing logic, memory seeding, debugging).
-
-**Step 3 (optional): Install the governance skill.**
-1. Run: `mkdir -p ~/.claude/skills/ai-governance`
-2. Copy **GOVERNANCE-SKILL.md** to `~/.claude/skills/ai-governance/SKILL.md`
-3. In any Claude Code session, type `/ai-governance` to activate
-
-The hooks in Steps 1-2 are required. They power the chain system, handoff detection, tool counting, and GP-3 retrospective. The skill in Step 3 is a convenience that loads the full protocol text into a session on demand.
+If you only want the governance skill (the protocol text loaded into a session on demand), copy `GOVERNANCE-SKILL.md` from this kit into `~/.claude/skills/ai-governance/SKILL.md` and type `/ai-governance` in a Claude Code session to activate it. That path works without the harness, but you lose the automated gates, chaining, and scans that the harness provides.
 
 ## What Happens After You Install It
 
