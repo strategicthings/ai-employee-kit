@@ -60,9 +60,9 @@ You need to do this every time you start a new conversation. That's why Option A
 
 ### Option C: Claude Code (CLI), install from upstream
 
-For technical team members using the terminal, the full governance hook harness (session-start gates, tool call counting, multi-session chaining, path guards, retrospective gates, secret scrubbing) lives in the upstream repository: [strategicthings/ai-governance-standards](https://github.com/strategicthings/ai-governance-standards).
+For technical team members using the terminal, the full governance hook harness (session-start gates, tool call counting, multi-session chaining, path guards, retrospective gates, secret scrubbing) lives in a private upstream repository. Contact the kit maintainers to request access.
 
-Follow the install documented there. This kit tracks that repository's releases and intentionally does not duplicate the harness scripts. Keeping them in one place avoids drift between this kit and the canonical source every time the harness is updated.
+Once you have access, follow the install documented in that repository. This kit tracks the upstream's releases and intentionally does not duplicate the harness scripts. Keeping them in one place avoids drift between this kit and the canonical source every time the harness is updated.
 
 If you only want the governance skill (the protocol text loaded into a session on demand), copy `GOVERNANCE-SKILL.md` from this kit into `~/.claude/skills/ai-governance/SKILL.md` and type `/ai-governance` in a Claude Code session to activate it. That path works without the harness, but you lose the automated gates, chaining, and scans that the harness provides.
 
