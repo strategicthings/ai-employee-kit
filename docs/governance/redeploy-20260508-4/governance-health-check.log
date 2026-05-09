@@ -1,0 +1,118 @@
+===========================================
+AI Governance Protocol: Health Check v5.7.255
+===========================================
+Project: /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit
+Date: 2026-05-08 14:16
+
+--- File Existence ---
+  [PASS] CLAUDE.md exists
+  [PASS] ABOUT.md exists
+  [PASS] CHANGELOG.md exists
+  [WARN] BREADCRUMBS.md missing (recommended for Tier 2+)
+  [WARN] TASKLOG.md missing (recommended for Tier 2+)
+
+--- Governance Bridge ---
+  [PASS] Governance bridge/gate found in CLAUDE.md
+
+--- Placeholder Check ---
+  [WARN] /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit/CLAUDE.md has 26 potential unfilled placeholders
+  [PASS] /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit/ABOUT.md is a template file (placeholder check skipped)
+
+--- Staleness Check ---
+  [PASS] /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit/CLAUDE.md modified 0 days ago
+  [PASS] /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit/ABOUT.md modified 0 days ago
+  [PASS] /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit/CHANGELOG.md modified 0 days ago
+
+--- Enforcement Hooks ---
+  [PASS] Pre-commit hook installed at .githooks/pre-commit
+
+--- Sync Matrix ---
+/Users/joshallen/Documents/Obsidian Vault/Project/ai-governance-standards/tier-3/automation/governance-health-check.sh: line 164: [: 0
+0: integer expression expected
+  [WARN] Sync matrix exists but has no rules defined
+
+--- Platform Constraints ---
+  [PASS] CL-1: CLAUDE.md is 115 lines (under 200)
+  [INFO] No skill.md files found
+  [PASS] CL-4: MEMORY.md is 126 lines (under 200)
+
+--- Version Consistency ---
+  [FAIL] Version mismatch: CLAUDE.md=2.0.0, VERSION=5.7.255
+
+--- Waterfall Chain ---
+  [FAIL] GOVERNANCE.md missing from waterfall chain
+  [FAIL] tier-2/SESSION-PROTOCOL.md missing from waterfall chain
+  [FAIL] tier-2/REVIEW-PROTOCOL.md missing from waterfall chain
+  [FAIL] tier-2/COUNSELOR-PROTOCOL.md missing from waterfall chain
+  [FAIL] tier-2/CHANGE-CONTROL.md missing from waterfall chain
+  [FAIL] tier-2/RECOVERY-PLAYBOOK.md missing from waterfall chain
+  [FAIL] tier-2/SSOT-CONTRACTS.md missing from waterfall chain
+  [FAIL] tier-2/TRACEABILITY.md missing from waterfall chain
+  [FAIL] tier-3/GOLDEN-TESTS-POLICY.md missing from waterfall chain
+  [FAIL] tier-3/DATA-CONTRACTS.md missing from waterfall chain
+  [FAIL] tier-3/BOOTSTRAP-PROTOCOL.md missing from waterfall chain
+  [FAIL] tier-3/CLAUDE-MD-TEMPLATE.md missing from waterfall chain
+  [FAIL] tier-3/COMPLETION-RUBRIC.md missing from waterfall chain
+  [FAIL] tier-3/DEPENDENCY-MAP.md missing from waterfall chain
+  [FAIL] tier-3/ENFORCEMENT-REALITY.md missing from waterfall chain
+  [FAIL] tier-3/ENVIRONMENT-ADAPTATION.md missing from waterfall chain
+  [FAIL] tier-3/PRECEDENCE.md missing from waterfall chain
+  [FAIL] tier-3/PLATFORM-CONSTRAINTS.md missing from waterfall chain
+  [FAIL] tier-3/SYNC-MATRIX-CONFIG.json missing from waterfall chain
+  [FAIL] governance/FOUNDATION.md missing from waterfall chain
+  [FAIL] governance/PLANNING-AND-SAFETY.md missing from waterfall chain
+  [FAIL] governance/REVIEW-AND-RECOVERY.md missing from waterfall chain
+  [FAIL] governance/SESSION-AND-AUDIT.md missing from waterfall chain
+  [FAIL] governance/ADVANCED.md missing from waterfall chain
+  [PASS] All tier files have navigation headers
+
+--- Behavioral Compliance ---
+  [WARN] CLAUDE.md changelog has no entries with HH:MM timestamps (C9 compliance)
+  [PASS] Governance Gate section found in CLAUDE.md
+  [PASS] Safety rules R1-R7 embedded in CLAUDE.md
+  [PASS] Invariants I1-I7 embedded in CLAUDE.md
+  [PASS] Governance Pulse (GP-1) referenced in CLAUDE.md
+  [PASS] Context compression survival block found
+  [PASS] Archetype field found in CLAUDE.md
+  [PASS] COMPLIANCE-SCORECARD.md exists
+
+--- Skill Adoption ---
+  [INFO] No SKILLS-MANIFEST.md (no adopted skills)
+
+--- Settings Deny/Allow Audit ---
+  [PASS] All allow rules have deny counterparts, no shadowed rules detected
+
+--- Migration Idempotency ---
+  [PASS] No migration scripts detected in bin/ or tier-3/automation/
+
+--- Compaction Readiness ---
+  [INFO] No compaction configuration found (optional, see CL-9)
+  [PASS] Session handoff template available for automated handoffs
+
+--- Tier File State ---
+  [INFO] No active tier files found in /tmp (expected on fresh hosts)
+
+--- Signed Artifacts ---
+  [INFO] No plan-review-pass artifact for SID=19
+  [INFO] No entitlement artifact for SID=19
+
+--- Beads Consistency ---
+  [INFO] No .beads/issues.jsonl (project may not use beads)
+
+--- Regression Sweep ---
+  [INFO] No recorded regression sweep at /tmp/claude-last-regression-sweep.json — populate via future bin/run-regression-sweep.sh tooling
+
+--- Deploy Parity ---
+  [INFO] No bin/deploy-to-global.sh in this repo; deploy parity not applicable
+
+--- Stale Claimed-By ---
+  [PASS] No stale .claimed-by-* sentinels older than 14 days
+
+===========================================
+SUMMARY
+===========================================
+Issues (blocking):  25
+Warnings:           5
+
+STATUS: UNHEALTHY (25 blocking issue(s) found)
+Action: Fix blocking issues before proceeding with AI-assisted work.

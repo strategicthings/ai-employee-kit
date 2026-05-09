@@ -1,0 +1,7 @@
+{
+  "_schema": "project-gate v1.2",
+  "_doc": "v1.2: plan_review_gate (boolean) fires post-tool-use.sh harness P54 gate on Tier 2+ ExitPlanMode; tier2_autonomous (boolean) routes Tier 2 plan approval through Skill(submit-plan-for-review) which writes the P54 marker, runs reviewers, and signs PASS automatically. Both must be true for full autonomous Tier 2 — tier2_autonomous alone is a no-op without plan_review_gate (per pp1 bead + v5.7.213 fanout).",
+  "plan_review_gate": true,
+  "tier2_autonomous": true,
+  "rules": []
+}

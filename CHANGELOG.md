@@ -1,3 +1,8 @@
+## [Unreleased]
+
+### Governance Update
+- Re-deployed governance from 0.2.0 to 5.7.242 on 20260507.
+
 # Changelog
 
 All notable changes to the AI Employee Kit are documented here.

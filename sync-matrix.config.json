@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "description": "Cross-file sync enforcement rules. When a source file changes, its required counterparts must also change in the same commit.",
+  "rules": [],
+  "ignorePatterns": ["*.test.js", "*.spec.js", "*.test.ts", "*.spec.ts"],
+  "noiseFilters": {
+    "skipComments": true,
+    "skipWhitespace": true
+  }
+}

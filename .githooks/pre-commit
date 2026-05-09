@@ -1,0 +1,52 @@
+#!/bin/bash
+# AI Governance Protocol: Pre-commit enforcement
+
+echo "Running governance pre-commit checks..."
+
+ERRORS=0
+
+# Check 1: If a sync matrix config exists, run the sync check
+if [ -f "sync-matrix.config.json" ] || [ -f "scripts/sync-matrix.config.json" ]; then
+    if command -v node &> /dev/null; then
+        SYNC_SCRIPT=""
+        if [ -f "scripts/check_sync_matrix.js" ]; then SYNC_SCRIPT="scripts/check_sync_matrix.js"
+        elif [ -f "check-sync.js" ]; then SYNC_SCRIPT="check-sync.js"
+        elif [ -f "tier-3/automation/check-sync.js" ]; then SYNC_SCRIPT="tier-3/automation/check-sync.js"
+        fi
+        if [ -n "$SYNC_SCRIPT" ]; then
+            node "$SYNC_SCRIPT"
+            if [ $? -ne 0 ]; then
+                echo "BLOCKED: Cross-file sync check failed."
+                ERRORS=$((ERRORS + 1))
+            fi
+        fi
+    fi
+fi
+
+# Check 2: Verify CHANGELOG was updated (for non-trivial commits)
+CHANGED_FILES=$(git diff --cached --name-only)
+CHANGED_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+
+if [ "$CHANGED_COUNT" -gt 3 ]; then
+    if ! echo "$CHANGED_FILES" | grep -q "CHANGELOG"; then
+        echo "WARNING: $CHANGED_COUNT files changed but CHANGELOG not updated."
+        echo "Consider adding a changelog entry."
+    fi
+fi
+
+# Check 3: Verify no source data files are being deleted
+DELETED_FILES=$(git diff --cached --diff-filter=D --name-only)
+if echo "$DELETED_FILES" | grep -qE '\.(db|sqlite|csv|json)$'; then
+    echo "BLOCKED: Attempting to delete data files. This violates Invariant I6."
+    echo "Deleted files: $(echo "$DELETED_FILES" | grep -E '\.(db|sqlite|csv|json)$')"
+    ERRORS=$((ERRORS + 1))
+fi
+
+if [ $ERRORS -gt 0 ]; then
+    echo ""
+    echo "$ERRORS governance violation(s) found. Commit blocked."
+    exit 1
+fi
+
+echo "Governance checks passed."
+exit 0
