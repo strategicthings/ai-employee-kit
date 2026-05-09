@@ -1,0 +1,87 @@
+=========================================
+AI Governance Protocol: Setup Enforcement
+=========================================
+
+Project root: /Users/joshallen/Documents/Obsidian Vault/Project/ai-employee-kit
+Governance repo: /Users/joshallen/Documents/Obsidian Vault/Project/ai-governance-standards
+
+Mode: full install (governance files + hooks + scripts + templates)
+
+[1/10] Creating governance directories...
+  Created: docs/governance/handoffs/, docs/audits/, backups/, tests/golden/
+[2/10] CLAUDE.md already exists. Skipping.
+[3/10] Copying governance core files...
+  Exists:  GOVERNANCE-CORE.md (skipped)
+[4/10] Copying reference files...
+  Exists:  QUICK-START.md (skipped)
+  Exists:  GLOSSARY.md (skipped)
+  Exists:  COMPLIANCE-SCORECARD.md (skipped)
+  Exists:  EXACT-PHRASES.md (skipped)
+  Exists:  ABOUT.md (skipped)
+  Exists:  GUARDRAIL-TEMPLATE.md (skipped)
+[5/10] Creating version tracking files...
+  Exists:  VERSION (skipped)
+  Exists:  CHANGELOG.md (skipped)
+[6/10] Setting up git hooks...
+  Created: .githooks/pre-commit
+  Configured: git core.hooksPath = .githooks
+[7/10] Creating sync matrix config...
+  Exists:  sync-matrix.config.json (skipped)
+[8/10] Installing Claude Code hooks...
+  Replaced: .claude/settings.json --force (filtered cp from AGS canonical SSOT; 13 hook entries; caller is responsible for archive — RD-3 in governance-update.sh)
+[9/10] Copying essential tier-2 templates...
+  Exists:  tier-2/SESSION-HANDOFF-TEMPLATE.md (skipped)
+  Exists:  tier-2/SELF-REGULATION-PROTOCOL.md (skipped)
+  Exists:  tier-2/AUDIT-TEMPLATE.md (skipped)
+  Exists:  tier-2/PLAN-TEMPLATE.md (skipped)
+  Exists:  tier-2/POST-MORTEM-TEMPLATE.md (skipped)
+  Exists:  tier-2/GATE-MANIFEST-TEMPLATE.md (skipped)
+[10/10] Scaffolding rules cache (.claude/rules/ + .claude/docs/)...
+  Exists:  .claude/rules/README.md (skipped)
+  Exists:  .claude/rules/rules-hygiene.md (skipped)
+
+Setup complete. Files installed:
+
+  Governance core:
+    CLAUDE.md              - Governance gate (R1-R7, I1-I9, GP-1)
+    GOVERNANCE-CORE.md     - Operating handbook (read every session)
+    QUICK-START.md         - 9-step reference card
+    GLOSSARY.md            - Term definitions
+    COMPLIANCE-SCORECARD.md - Session scoring (C1-C13)
+    EXACT-PHRASES.md       - Copy-paste governance prompts
+    ABOUT.md               - Company/project context (fill in)
+    GUARDRAIL-TEMPLATE.md  - Project-specific rules (fill in)
+    VERSION                - Version tracking
+    CHANGELOG.md           - Change history
+
+  Claude Code hooks:
+    .claude/settings.json  - SessionStart + UserPromptSubmit + PreToolUse + PostToolUse + Stop
+    bin/                   - full harness (15 scripts, see DEPLOYMENT-CHECKLIST.md D-3)
+
+  Rules cache:
+    .claude/rules/README.md
+    .claude/rules/rules-hygiene.md
+    .claude/docs/          - overflow directory (empty, for project use)
+
+  Git hooks:
+    .githooks/pre-commit   - Blocks data file deletion (I6)
+
+  Templates (self-regulation cycle):
+    tier-2/SESSION-HANDOFF-TEMPLATE.md
+    tier-2/SELF-REGULATION-PROTOCOL.md
+    tier-2/AUDIT-TEMPLATE.md
+    tier-2/PLAN-TEMPLATE.md
+    tier-2/POST-MORTEM-TEMPLATE.md
+    tier-2/GATE-MANIFEST-TEMPLATE.md
+
+Next steps:
+  1. Fill in CLAUDE.md [PLACEHOLDER] sections with your project details
+  2. Fill in ABOUT.md with your company/project context
+  3. Fill in GUARDRAIL-TEMPLATE.md with project-specific rules
+  4. Edit bin/session-start-gate.sh to remove or customize PROJECT-SPECIFIC BLOCK rules
+  5. Author project rules under .claude/rules/ (keep total under 15k chars; overflow to .claude/docs/)
+  6. (Optional) Copy tier-2/GATE-MANIFEST-TEMPLATE.md into the project and fill in ship-gate checks
+  7. Commit: git add . && git commit -m 'Add governance enforcement'
+  8. Read QUICK-START.md for how to use governance in your first session
+
+AI Governance Protocol v5.7.264

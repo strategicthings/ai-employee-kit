@@ -2,45 +2,23 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/session-start-gate.sh\""
+            "command": "echo '0' > /tmp/claude-session-toolcount && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"GOVERNANCE GATE ACTIVE: You MUST read CLAUDE.md now and produce the governance acknowledgment as your first response. Format: Governance active. Tier [X]. Archetype [Y]. Safety rules R1-R7 loaded. Invariants I1-I9 loaded. Awaiting task.\"}}'",
+            "statusMessage": "Loading governance gate..."
           },
           {
             "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/session-start-tier-seed.sh\""
+            "command": "bash /Users/joshallen/.claude/bin/session-start-tier-seed.sh",
+            "timeout": 5,
+            "statusMessage": "Seeding tier from handoff..."
           },
           {
             "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/rules-hygiene-check.sh\""
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/userpromptsubmit-guard.sh\""
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/pretool-plan-guard.sh\""
-          },
-          {
-            "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/pretool-path-shell-guard.sh\""
+            "command": "bash $HOME/.claude/bin/ftyo-loop-detector.sh",
+            "timeout": 3,
+            "statusMessage": "Checking for chain-resume loop pattern..."
           }
         ]
       }
@@ -51,7 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/post-tool-use.sh\""
+            "command": "bash /Users/joshallen/.claude/bin/standing-auth-stall-detector.sh",
+            "timeout": 3
           }
         ]
       }
@@ -62,14 +41,97 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/stop-handoff-guard.sh\""
-          },
-          {
-            "type": "command",
-            "command": "bash \"/Users/joshallen/.claude/bin/stop-advisories.sh\""
+            "command": "bash /Users/joshallen/.claude/bin/standing-auth-stall-detector.sh",
+            "timeout": 3
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/joshallen/.claude/bin/task-boundary-detect.sh",
+            "timeout": 5,
+            "statusMessage": "Detecting task boundary..."
+          },
+          {
+            "type": "command",
+            "command": "bash /Users/joshallen/.claude/bin/assistant-tier-capture.sh",
+            "timeout": 5,
+            "statusMessage": "Capturing tier classification..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/pretool-r5-cascade-drift-guard.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "EnterPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/pretool-enterplanmode-block.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/closed-by-guard.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/dual-sentinel-guard.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/frontmatter-coherence-guard.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/bin/precommit-bin-exec-check.sh",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bash bin/sign-plan-review-pass.sh:*)"
     ]
   }
 }

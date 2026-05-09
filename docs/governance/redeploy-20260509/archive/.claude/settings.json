@@ -1,0 +1,75 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/session-start-gate.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/session-start-tier-seed.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/rules-hygiene-check.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/userpromptsubmit-guard.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/pretool-plan-guard.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/pretool-path-shell-guard.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/post-tool-use.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/stop-handoff-guard.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"/Users/joshallen/.claude/bin/stop-advisories.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
